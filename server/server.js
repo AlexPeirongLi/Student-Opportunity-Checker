@@ -28,6 +28,7 @@ app.get("/opportunities", (req, res) => {
   const type = req.query.type;
   const location = req.query.location;
   let sql = "SELECT * FROM opportunities";
+
   if (search && type && location) {
     sql = `SELECT * FROM opportunities WHERE title LIKE '%${search}%' AND type = '${type}' AND location = '${location}'`;
   } else if (search && type) {
@@ -49,6 +50,42 @@ app.get("/opportunities", (req, res) => {
       res.status(500).json({ error: "Failed to get opportunities" });
     } else {
       res.json(results);
+    }
+  });
+});
+
+app.post("/opportunities", (req, res) => {
+  const title = req.body.title;
+  const type = req.body.type;
+  const location = req.body.location;
+  const eligibility = req.body.eligibility;
+  const deadline = req.body.deadline;
+  const sql = `
+    INSERT INTO opportunities
+    (title, type, location, eligibility, deadline, status)
+    VALUES
+    ('${title}', '${type}', '${location}', '${eligibility}', '${deadline}', 'Not Applied')
+  `;
+  db.query(sql, (error) => {
+    if (error) {
+      res.status(500).json({ error: "Failed to add opportunity" });
+    } else {
+      res.json({ message: "Opportunity added" });
+    }
+  });
+});
+app.put("/opportunities/:id/status", (req, res) => {
+  const id = req.params.id;
+  const status = req.body.status;
+
+  const sql =
+    `UPDATE opportunities SET status = '${status}' WHERE id = ${id}`;
+
+  db.query(sql, (error) => {
+    if (error) {
+      res.status(500).json({ error: "Failed to update status" });
+    } else {
+      res.json({ message: "Status updated" });
     }
   });
 });
