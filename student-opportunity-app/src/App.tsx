@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import AddOpportunity from "./AddOpportunity";
+// TODO (STEP 7): import ImportAdzuna from "./ImportAdzuna";
 import "./App.css";
 
+// TODO (STEP 7): imported rows have new columns and some empty ones. Update this type:
+//   - add source: string and url: string | null
+//   - add posted_date: string | null (when it opened; used by the timeline and isOpen())
+//   - location, eligibility and deadline can now be null (string | null)
 type Opportunity = {
   id: number;
   title: string;
@@ -18,6 +23,7 @@ const App = () => {
   const [type, setType] = useState("");
   const [location, setLocation] = useState("");
   const [showAddPage, setShowAddPage] = useState(false);
+  // TODO (STEP 7): add a showImportPage state, the same way as showAddPage
   const getOpportunities = () => {
     fetch(
       `http://localhost:3001/opportunities?search=${searchTerm}&type=${type}&location=${location}`,
@@ -58,10 +64,14 @@ const App = () => {
     );
   }
 
+  // TODO (STEP 7): like the `if (showAddPage)` block above, return <ImportAdzuna onBack={...} onImported={...} />
+  // when showImportPage is true. onImported should hide the page and call getOpportunities().
+
   return (
     <div>
       <h1>Student Opportunity Checker</h1>
       <button onClick={() => setShowAddPage(true)}>Add Opportunity</button>
+      {/* TODO (STEP 7): an "Import from Adzuna" button that sets showImportPage to true */}
       <div>
         <input
           type="text"
@@ -74,6 +84,7 @@ const App = () => {
           <option value="Internship">Internship</option>
           <option value="Hackathon">Hackathon</option>
           <option value="Competition">Competition</option>
+          {/* TODO (STEP 7): toOpportunity() also gives "Graduate" and "Job". Add options for them */}
         </select>
         <select
           value={location}
@@ -94,6 +105,9 @@ const App = () => {
             <th className="table-heading">Eligibility</th>
             <th className="table-heading">Deadline</th>
             <th className="table-heading">Status</th>
+            {/* TODO (STEP 8): add a "Link" heading */}
+            {/* LATER (timeline): a "Posted" column, and an "Open only" checkbox that filters with
+                opportunities.filter((o) => isOpen(o)). isOpen is in src/isOpen.ts */}
           </tr>
         </thead>
         <tbody>
@@ -103,6 +117,7 @@ const App = () => {
               <td className="table-data">{opportunity.type}</td>
               <td className="table-data">{opportunity.location}</td>
               <td className="table-data">{opportunity.eligibility}</td>
+              {/* TODO (STEP 8): imported rows have no deadline. Show "Not stated" when it's null (?? helps) */}
               <td className="table-data">{opportunity.deadline}</td>
               <td className="table-data">
                 <select
@@ -118,6 +133,9 @@ const App = () => {
                   <option value="Rejected">Rejected</option>
                 </select>
               </td>
+              {/* TODO (STEP 8): a cell with an "Apply" link to opportunity.url (target="_blank" rel="noreferrer"),
+                  only when url isn't null. For source === "adzuna" rows, also show a small "via Adzuna" link
+                  to https://www.adzuna.co.uk (their terms require crediting them). */}
             </tr>
           ))}
         </tbody>
