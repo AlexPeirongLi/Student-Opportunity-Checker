@@ -1,2 +1,4 @@
 node_modules/
 .env
+last-check.json
+weekly-check.log

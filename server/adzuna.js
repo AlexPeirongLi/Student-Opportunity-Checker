@@ -1,29 +1,25 @@
-async function searchAdzuna({ what, where }) {
-  const appId = process.env.ADZUNA_APP_ID;
-  const appKey = process.env.ADZUNA_APP_KEY;
-  if (!appId || !appKey) {
-    throw new Error("Missing ADZUNA ID or KEY in .env")
-  }
+const {ADZUNA_MAX_DAYS_OLD} = require("./settings");
 
+async function searchAdzuna(what, where) {
+  if (!process.env.ADZUNA_APP_ID || !process.env.ADZUNA_APP_KEY) {
+    throw new Error("Missing ADZUNA_APP_ID or ADZUNA_APP_KEY in .env");
+  }
   const params = new URLSearchParams({
-    app_id: appId,
-    app_key:appKey,
-    what:what,
-    results_per_page:"20",
+    app_id: process.env.ADZUNA_APP_ID,
+    app_key: process.env.ADZUNA_APP_KEY,
+    what: what,
+    results_per_page: "20",
+    max_days_old: String(ADZUNA_MAX_DAYS_OLD),
   });
-
-  if (where){
-    params.append("where",where);
+  if (where) {
+    params.append("where", where);
   }
-
-  const url = `https://api.adzuna.com/v1/api/jobs/gb/search/1?${params}`;
-  // TODO: fetch it, check response.ok, turn it into JSON, return data.results
-  const response = await fetch(url);
-  if (!response.ok){
+  const response = await fetch(`https://api.adzuna.com/v1/api/jobs/gb/search/1?${params}`);
+  if (!response.ok) {
     throw new Error(`Adzuna request failed with status ${response.status}`);
   }
-  const data = await response.json()
-  return data.results
+  const data = await response.json();
+  return data.results;
 }
 
 function toOpportunity(job) {
@@ -34,17 +30,12 @@ function toOpportunity(job) {
   } else if (lowerTitle.includes("graduate")) {
     type = "Graduate";
   }
-
   return {
     title: `${job.title} at ${job.company?.display_name ?? "Unknown company"}`,
     type: type,
     location: job.location?.display_name ?? null,
-    eligibility: null,          
-    deadline: null,             
-    source: "adzuna",
     external_id: String(job.id),
     url: job.redirect_url,
-    // when the advert went up, for the timeline. "2026-10-08T23:49:44Z" -> "2026-10-08"
     posted_date: job.created?.slice(0, 10) ?? null,
   };
 }
